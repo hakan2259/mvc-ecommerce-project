@@ -1,0 +1,678 @@
+$(document).ready(function (e) {
+
+    //Kullanıcı Panel İade Onaylandı  İşlemi
+    $('#iadeonayla a').on('click', function () {
+
+        var eleman = $(this);
+        var sipno = $(this).attr('data-value');
+        var iadeiskelet = eleman.parents('.arkaplan');
+        $.post("http://localhost/mvcproje/GenelGorev/iadeonaylamaislemi", {
+            "sipno": sipno
+        }, function () {
+            iadeiskelet.fadeOut();
+
+        })
+
+
+    })
+    //Kullanıcı Panel İade Onaylandı  İşlemi
+
+
+    //İade İşlemi
+    $('body #iade').on('click', function () {
+        var eleman = $(this);
+        var sipno = $(this).attr('data-value');
+        var iadeiskelet = eleman.parents('.arkaplan2').find('#iadeiskelet')
+
+
+        iadeiskelet.html('<div class="alert alert-primary text-center"><button id="iadebutonu" class="btn btn-primary" data-value="' + sipno + '">İADE ET</button>' +
+            '<button id="iadevazgec" class="btn btn-danger" data-value="' + sipno + '">VAZGEÇ</button></div>');
+        iadeiskelet.find('#iadebutonu').click(function () {
+            var sipno = $(this).attr('data-value');
+            $.post("http://localhost/mvcproje/GenelGorev/iadeislemi", {
+                "sipno": sipno
+            }, function (cevap) {
+                iadeiskelet.html(cevap);
+
+            })
+        })
+        $('#iadevazgec').click(function () {
+            iadeiskelet.html("").hide();
+        })
+
+    })
+    //İade İşlemi
+
+    //EKRANDAKİ ÜRÜNÜ GÜNCELLEME
+    $('#anaekranselect').attr("disabled", false);
+    $('#cocukekranselect').attr("disabled", true);
+    $('#katidekranselect').attr("disabled", true);
+
+
+    $('#anaekranselect').on('change', function () {
+        var secilendeger = $(this).val();
+
+        $.post("http://localhost/mvcproje/GenelGorev/SelectKontrol", {
+            "kriter": "anaekrancocukgetir",
+            "anaid": secilendeger
+        }, function (cevap) {
+            $('#cocukekranselect').attr("disabled", false);
+            $('#cocukekranselect').html(cevap);
+        })
+        $('#katidekranselect').attr("disabled", true).html('<option value="0">Seçiniz</option>');
+    })
+
+    $('#cocukekranselect').on('change', function () {
+        var secilendeger = $(this).val();
+        $('#katidekranselect').attr("disabled", false);
+        $.post("http://localhost/mvcproje/GenelGorev/SelectKontrol", {
+            "kriter": "cocukekrankatgetir",
+            "cocukid": secilendeger
+        }, function (cevap) {
+            $('#katidekranselect').html(cevap);
+        })
+
+    })
+    //EKRANDAKİ ÜRÜNÜ GÜNCELLEME
+
+    /*ÜRÜN GÜNCELLEME*/
+    $('#sifirla').on('click', function () {
+        $('#anaselect').attr("disabled", false);
+        $('#cocukselect').attr("disabled", false).html('<option value="0">Seçiniz</option>');
+        $('#altselect').attr("disabled", false).html('<option value="0">Seçiniz</option>');
+    })
+    $('#anaselect').on('change', function () {
+        var secilendeger = $(this).val();
+
+        $.post("http://localhost/mvcproje/GenelGorev/SelectKontrol", {
+            "kriter": "cocukgetir",
+            "anaid": secilendeger
+        }, function (cevap) {
+            $('#cocukselect').html(cevap);
+        })
+        $('#altselect').attr("disabled", true).html('<option value="0">Seçiniz</option>');
+    })
+
+    $('#cocukselect').on('change', function () {
+        var secilendeger = $(this).val();
+        $('#altselect').attr("disabled", false);
+        $.post("http://localhost/mvcproje/GenelGorev/SelectKontrol", {
+            "kriter": "altgetir",
+            "cocukid": secilendeger
+        }, function (cevap) {
+            $('#altselect').html(cevap);
+        })
+
+    })
+    /*ÜRÜN GÜNCELLEME*/
+
+    $('#sec').click(function () {
+        $('#EklemeFormuAna input[type="checkbox"]').attr("checked", true);
+
+    });
+
+    $('#kaldir').click(function () {
+        $('#EklemeFormuAna input[type="checkbox"]').attr("checked", false);
+    });
+
+
+    $('#guncelSec').click(function () {
+        $('#FormGuncelAna input[type="checkbox"]').attr("checked", true);
+
+    });
+
+    $('#guncelKaldir').click(function () {
+        $('#FormGuncelAna input[type="checkbox"]').attr("checked", false);
+    });
+
+    // Modal Adres Bilgileri Getir
+    $('#detaygoster #adres').click(function () {
+        var sipno = $(this).attr('data-value');
+        var adresid = $(this).attr('data-value2');
+
+        $.post("http://localhost/mvcproje/GenelGorev/adresBilgileriGetir", {
+            "sipno": sipno,
+            "adresid": adresid
+        }, function (cevap) {
+            $('#exampleModalLongTitle').html("Teslimat adresi ve kişisel bilgiler");
+            $('.modal-body').html(cevap);
+        })
+    })
+    // Modal Adres Bilgileri Getir
+
+    // Modal Siparis Bilgileri Getir
+    $('#detaygoster #siparis').click(function () {
+        var sipno = $(this).attr('data-value');
+        var adresid = $(this).attr('data-value2');
+
+        $.post("http://localhost/mvcproje/GenelGorev/siparisBilgileriGetir", {
+            "sipno": sipno,
+            "adresid": adresid
+        }, function (cevap) {
+            $('#exampleModalLongTitle').html("Sipariş Özeti");
+            $('.modal-body').html(cevap);
+        })
+    })
+    // Modal Siparis Bilgileri Getir
+
+    //Çıktı Alma
+    jQuery.fn.extend({
+        printElem: function () {
+            var cloned = this.clone();
+            var printSection = $('#printSection');
+            if (printSection.length == 0) {
+                printSection = $('<div id="printSection"></div>')
+                $('body').append(printSection);
+            }
+            printSection.append(cloned);
+            var toggleBody = $('body *:visible');
+            toggleBody.hide();
+            $('#printSection, #printSection *').show();
+            window.print();
+            printSection.remove();
+            toggleBody.show();
+        }
+    });
+
+    $(document).ready(function () {
+        $(document).on('click', '#btnPrint', function () {
+            $('#exampleModalCenter').printElem();
+        });
+    });
+
+
+    //Çıktı Alma
+
+    $("#aramakutusu").attr("placeholder", "Sipariş numarası");
+
+    $("#aramaselect").on('change', function (e) {
+
+        var secilenial = $(this);
+        var valueninDegeri = secilenial.val();
+        if (valueninDegeri == "sipno") {
+            $("#aramakutusu").val("");
+            $("#aramakutusu").attr("placeholder", "Sipariş numarası yazın");
+        }
+        if (valueninDegeri == "uyebilgi") {
+            $("#aramakutusu").val("");
+            $("#aramakutusu").attr("placeholder", "Üye Bilgilerin herhangi biri");
+        }
+
+
+    });
+
+
+    $("#SepetDurum").load("http://localhost/mvcproje/GenelGorev/SepetKontrol");
+
+    $("#Sonuc").hide();
+
+    $("#FormAnasi").hide();
+
+
+    $("#yorumEkle").click(function (e) {
+        $("#FormAnasi").slideToggle();
+
+    });
+
+
+    $("#yorumGonder").click(function () {
+
+        $.ajax({
+            type: "POST",
+            url: 'http://localhost/mvcproje/GenelGorev/YorumFormKontrol',
+            data: $('#yorumForm').serialize(),
+            success: function (donen_veri) {
+                $('#yorumForm').trigger("reset");
+                $('#FormSonuc').html(donen_veri);
+
+                if ($('#ok').html() == "Yorumunuz kayıt edildi. Onaylandıktan sonra yayınlanacaktır") {
+                    $("#FormAnasi").fadeOut();
+
+
+                }
+
+
+            },
+        });
+
+
+    });
+
+
+    $("[type='number']").keypress(function (evt) {
+        evt.preventDefault();
+
+
+    });
+    // Bulten Toplu Mail Silme
+    $('#topluSilBtn').click(function () {
+        var elemanlar = $(":checkbox:checked");
+        var idler = "";
+
+        elemanlar.each(function () {
+
+            idler += $(this).val() + ",";
+
+        })
+
+        $.post("http://localhost/mvcproje/GenelGorev/BultenTopluMailSil", {
+            "idler": idler,
+
+        }, function () {
+            var anaiskelet = $(":checkbox:checked").parents('.mailcerceve');
+            anaiskelet.css("background", "black");
+            anaiskelet.fadeOut();
+            window.location.reload()
+
+        });
+
+
+    })
+    $("#tumunuSecBtn").click(function () {
+          $("body input[type='checkbox']").attr("checked",true);
+
+    })
+    $("#tumunuKaldırBtn").click(function () {
+        $("body input[type='checkbox']").attr("checked",false);
+
+
+    })
+    // Bulten Toplu Mail Silme
+
+    //Urunler Toplu Silme ----------------------
+    $('#TopluUrunSilBtn').click(function () {
+        var elemanlar = $(":checkbox:checked");
+        var idler = "";
+
+        elemanlar.each(function () {
+
+            idler += $(this).val() + ",";
+
+        })
+        $.post("http://localhost/mvcproje/GenelGorev/UrunlerTopluSilme", {
+            "idler": idler,
+
+        }, function () {
+            var anaiskelet = $(":checkbox:checked").parents('#urunlercerceve');
+            anaiskelet.css("background", "gray");
+            anaiskelet.fadeOut("slow", function () {
+                window.location.reload()
+            });
+
+
+        });
+
+    })
+    //Buraya geleceğim toplu checked da sorun var silmiyor!!..
+    $('input[type = "checkbox"][name = "anacheck"]').click(function () {
+        if(this.checked){
+            $('input[type="checkbox"][name = "silmecheck"]').attr("checked",true);
+        }
+        else{
+            $('input[type="checkbox"][name = "silmecheck"]').attr("checked",false);
+        }
+    })
+    //Buraya geleceğim toplu checked da sorun var silmiyor!!..
+    //Urunler Toplu Silme ---------------------- bitiş
+
+
+    $("#bultenBtn").click(function () {
+
+
+        $.ajax({
+            type: "POST",
+            url: 'http://localhost/mvcproje/GenelGorev/BultenKayit',
+            data: $('#bultenForm').serialize(),
+            success: function (donen_veri) {
+                $('#bultenForm').trigger("reset");
+                $('#Bulten').html(donen_veri);
+
+                if ($('#bultenok').html() == "Bultene Başarılı bir şekilde kayıt oldunuz. Teşekkür ederiz") {
+
+
+                }
+
+
+            },
+        });
+
+
+    });
+
+
+    $("#İletisimbtn").click(function () {
+        //$('#iletisimForm').fadeOut();
+
+
+//$('#FormSonuc').html("Merhaba");
+
+
+        $.ajax({
+            type: "POST",
+            url: 'http://localhost/mvcproje/GenelGorev/iletisim',
+            data: $('#iletisimForm').serialize(),
+            success: function (donen_veri) {
+                $('#iletisimForm').trigger("reset");
+                $('#FormSonuc').html(donen_veri);
+
+                if ($('#formok').html() == "Mesajınız Alındı. En kısa sürede Dönüş yapılacaktır. Teşekkür ederiz") {
+
+                    $('#iletisimForm').fadeOut();
+                    $('#FormSonuc').html(donen_veri);
+
+
+                }
+
+
+            },
+        });
+
+
+    });
+
+
+    $("#SepetBtn").click(function () {
+
+
+        $.ajax({
+            type: "POST",
+            url: 'http://localhost/mvcproje/GenelGorev/SepeteEkle',
+            data: $('#SepeteForm').serialize(),
+            success: function (donen_veri) {
+                $('#SepeteForm').trigger("reset");
+
+
+                $("html,body").animate({scrollTop: 0}, "slow");
+
+                $("#SepetDurum").load("http://localhost/mvcproje/GenelGorev/SepetKontrol");
+                $('#Mevcut').html('<div class="alert alert-success text-center">SEPETE EKLENDİ</div>');
+
+
+            },
+        });
+
+
+    });
+
+
+    $('#GuncelForm input[type="button"]').click(function () {
+
+        var id = $(this).attr('data-value');
+
+
+        var adet = $('#GuncelForm input[name="adet' + id + '"]').val();
+
+
+        $.post("http://localhost/mvcproje/GenelGorev/UrunGuncelle", {"urunid": id, "adet": adet}, function () {
+
+            window.location.reload();
+
+        });
+
+
+    });
+
+
+    //--------------------------------------------------------------------------
+
+
+    $('#GuncelButonlarinanasi input[type="button"]').click(function () {
+
+        var id = $(this).attr('data-value');
+
+
+        var textArea = $("<textarea id='" + id + "' name='yorum' style='width:100% height:200px' />");
+
+
+        textArea.val($(".sp" + id).html());
+        $(".sp" + id).parent().append(textArea);
+        $(".sp" + id).remove();
+        input.focus();
+
+
+    });
+
+
+    $(document).on('blur', 'textarea[name=yorum]', function () {
+
+        $(this).parent().append($('<span/>').html($(this).val()));
+        var id = $(this).attr("id");
+        $(this).remove();
+
+
+        $.post("http://localhost/mvcproje/uye/YorumGuncelle", {
+            "yorumid": id,
+            "yorum": $(this).val()
+        }, function (donen) {
+
+            //alert(donen);
+
+            window.location.reload();
+
+        });
+
+
+    });
+
+
+//---------------------------------------------------------------------------
+
+    $('#AdresGuncelButonlarinanasi input[type="button"]').click(function () {
+
+        var id = $(this).attr('data-value');
+
+
+        var textArea = $("<textarea id='" + id + "' name='adres' style='width:100%; height:100%;' />");
+
+
+        textArea.val($(".adresSp" + id).html());
+        $(".adresSp" + id).parent().append(textArea);
+        $(".adresSp" + id).remove();
+        input.focus();
+
+
+    });
+
+
+    $(document).on('blur', 'textarea[name=adres]', function () {
+
+        $(this).parent().append($('<span/>').html($(this).val()));
+        var id = $(this).attr("id");
+        $(this).remove();
+
+
+        $.post("http://localhost/mvcproje/uye/AdresGuncelle", {
+            "adresid": id,
+            "adres": $(this).val()
+        }, function (donen) {
+
+            //alert(donen);
+
+            window.location.reload();
+
+        });
+
+
+    });
+
+
+    var ad, soyad, mail, telefon;
+
+
+    $('input[name=bilgiTercih]').on('change', function () {
+
+
+        var gelenTercih = $(this).val(); // 0-1
+
+        if (gelenTercih == 1) {
+            ad = $('input[id=sipAd]').val();
+            soyad = $('input[id=sipSoyad]').val();
+            mail = $('input[id=sipMail]').val();
+            telefon = $('input[id=sipTlf]').val();
+
+
+            $('input[id=sipAd]').val("");
+            $('input[id=sipSoyad]').val("");
+            $('input[id=sipMail]').val("");
+            $('input[id=sipTlf]').val("");
+
+        } else {
+
+            $('input[id=sipAd]').val(ad);
+            $('input[id=sipSoyad]').val(soyad);
+            $('input[id=sipMail]').val(mail);
+            $('input[id=sipTlf]').val(telefon);
+
+        }
+
+
+    });
+
+
+});
+
+function VarsayilanYap(uyeid, adresid) {
+    $.post("http://localhost/mvcproje/GenelGorev/VarsayilanAdresYap", {
+        "uyeid": uyeid,
+        "adresid": adresid
+    }, function () {
+
+        $.post("http://localhost/mvcproje/GenelGorev/VarsayilanAdresYap2", {
+            "uyeid": uyeid,
+            "adresid": adresid
+        }, function () {
+
+            window.location.reload();
+
+        });
+
+    });
+}
+
+function UyeYorumOnay(yorumid, kriter) {
+    $.post("http://localhost/mvcproje/GenelGorev/uyeyorumkontrol", {"yorumid": yorumid, "kriter": kriter}, function () {
+
+        window.location.reload();
+
+    });
+
+}
+
+function UrunSil(deger, kriter) {
+
+    switch (kriter) {
+
+
+        case "sepetsil":
+            $.post("http://localhost/mvcproje/GenelGorev/UrunSil", {"urunid": deger}, function () {
+
+                window.location.reload();
+
+            });
+
+
+            break;
+
+        case "yorumsil":
+
+
+            $.post("http://localhost/mvcproje/uye/Yorumsil", {"yorumid": deger}, function (donen) {
+
+
+                if (donen) {
+                    $("#Sonuc").html("Yorum başarıyla silindi.");
+                } else {
+                    $("#Sonuc").html("Silme işleminde hata oluştu.");
+
+                }
+
+                $("#Sonuc").fadeIn(1000, function () {
+
+                    $("#Sonuc").fadeOut(1000, function () {
+                        $("#Sonuc").html("");
+                        window.location.reload();
+
+                    });
+
+
+                });
+
+
+            });
+
+
+            break;
+
+        case "adresSil":
+            $.post("http://localhost/mvcproje/uye/adresSil", {"adresid": deger}, function (donen) {
+
+
+                if (donen) {
+                    $("#Sonuc").html("Adres başarıyla silindi.");
+                } else {
+                    $("#Sonuc").html("Silme işleminde hata oluştu.");
+
+                }
+
+                $("#Sonuc").fadeIn(1000, function () {
+
+                    $("#Sonuc").fadeOut(1000, function () {
+                        $("#Sonuc").html("");
+                        window.location.reload();
+
+                    });
+
+
+                });
+
+
+            });
+
+
+            break;
+
+
+    }
+
+
+}
+
+function BilgiPenceresi(linkAdres, sonucbaslik, sonucmetin, sonuctur) {
+
+    swal(sonucbaslik, sonucmetin, sonuctur, {
+        buttons: {
+            catch: {
+                text: "CLOSE",
+                value: "tamam",
+            }
+        },
+    })
+        .then((value) => {
+            if (value == "tamam") {
+                window.location.href = linkAdres;
+            }
+
+        });
+
+}
+
+
+function silmedenSor(gidilecekLink) {
+
+    swal({
+        title: "Are you sure you want to delete it?",
+        text: "Deleted data cannot be recovered",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+    })
+        .then((willDelete) => {
+            if (willDelete) {
+                window.location.href = gidilecekLink;
+            } else {
+                swal({title: "You gave up deleting", icon: "warning",});
+            }
+        });
+
+}
+
